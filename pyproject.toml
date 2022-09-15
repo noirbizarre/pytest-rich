@@ -1,9 +1,175 @@
 [build-system]
-requires = [
-    "setuptools>=42",
-    "setuptools-scm",
-    "wheel"
-]
-build-backend = "setuptools.build_meta"
+requires = ["pdm-pep517>=1.0.0"]
+build-backend = "pdm.pep517.api"
 
-[tool.setuptools_scm]
+
+[project]
+name = "pytest-rich"
+dynamic = ["version"]
+description = "Pytest plugin leveraging rich for richer test session output"
+authors = [
+    {name = "Bruno Oliveira", email = "nicoddemus@gmail.com"},
+    {name = "Axel H.", email = "noirbizarre@gmail.com"},
+]
+dependencies = [
+    "pytest >= 7.0",
+    "rich",
+    "typing_extensions; python_version < '3.8'",
+]
+requires-python = ">=3.7"
+readme = "README.md"
+license = {text = "MIT"}
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: Pytest",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Testing",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Operating System :: OS Independent",
+    "License :: OSI Approved :: MIT License",
+]
+
+
+[project.urls]
+Homepage = "https://github.com/nicoddemus/pytest-rich"
+Documentation = "https://github.com/nicoddemus/pytest-rich#readme"
+Repository = "https://github.com/nicoddemus/pytest-rich"
+Issues = "https://github.com/nicoddemus/pytest-rich/issues"
+
+[project.entry-points.pytest11]
+rich = "pytest_rich.plugin"
+
+
+[tool.pdm]
+[tool.pdm.version]
+source = "scm"
+write_to = "pytest_rich/_version.py"
+write_template = '__version__ = "{}"'
+
+[tool.pdm.dev-dependencies]
+test = [
+    "pytest-cov>=3.0.0",
+]
+lint = [
+    "absolufy-imports>=0.3.1",
+    "autoflake>=1.5.3",
+    "black>=22.6.0",
+    "flakeheaven>=3.0.0",
+    "isort>=5.10.1",
+    "mypy>=0.971",
+]
+tox = [
+    "tox",
+    "tox-pdm>=0.5",
+]
+
+
+[tool.pdm.scripts]
+cover.help = "Run the test suite with coverage"
+cover.composite = [
+  """
+  test
+    --cov-report=term
+    --cov=pytest_rich
+    --cov-report=html:reports/coverage
+    --cov-report=xml:reports/coverage.xml
+    --junitxml=reports/tests.junit.xml
+  """
+]
+
+lint.help = "Lint all tracked files using pre-commit"
+lint.cmd = "pre-commit run --all-files"
+
+test.help = "Run the test suite"
+test.cmd = "pytest --rich"
+
+tox.help = "Run the test suite against all supported Python version"
+tox.cmd = "tox"
+
+
+[tool.pdm.ide]
+linters = ["flakeheaven"]
+formatter = "black"
+
+
+[tool.black]
+line-length = 100
+exclude = '''
+/(
+    \.git
+  | \.mypy_cache
+  | \.pytest_cache
+  | \.tox
+  | \.venv
+  | __pycache__
+  | __pypackages__
+  | build
+  | dist
+  | reports
+)/
+'''
+
+[tool.flakeheaven]
+format = "grouped"
+max_line_length = 110
+exclude = [
+  ".git",
+  ".github",
+  ".mypy_cache",
+  ".pytest_cache",
+  ".tox",
+  ".venv",
+  "__pycache__",
+  "__pypackages__",
+  "build",
+  "dist",
+  "reports",
+]
+[tool.flakeheaven.plugins]
+pycodestyle = ["+*", "-E203"]
+pyflakes = ["+*"]
+mccabe = ["+*"]
+
+
+[tool.autoflake]
+in-place = true
+ignore-init-module-imports =  true
+remove-all-unused-imports = true
+remove-unused-variables = true
+
+
+[tool.isort]
+# See: https://pycqa.github.io/isort/docs/configuration/black_compatibility/
+profile = "black"
+multi_line_output = 3
+include_trailing_comma = true
+line_length = 100
+atomic = true
+filter_files = true
+known_first_party = ["pytest_rich"]
+known_third_party = ["pytest", "rich"]
+
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+norecursedirs = ".git .venv build dist"
+testpaths = [
+  "src/",
+  "tests/",
+]
+
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+omit = [
+  "tests/*",
+]

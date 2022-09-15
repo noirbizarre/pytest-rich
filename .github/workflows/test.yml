@@ -4,7 +4,11 @@ on:
   push:
     branches:
       - "*"
+    paths-ignore:
+      - "*.md"
   pull_request:
+    paths-ignore:
+      - "*.md"
   workflow_call:
 
 jobs:
@@ -18,28 +22,16 @@ jobs:
       matrix:
         python: ["3.7", "3.8", "3.9", "3.10", "pypy-3.7"]
         os: [ubuntu-latest, windows-latest]
-        include:
-          - python: "3.7"
-            tox_env: "py37"
-          - python: "3.8"
-            tox_env: "py38"
-          - python: "3.9"
-            tox_env: "py39"
-          - python: "3.10"
-            tox_env: "py310"
-          - python: "pypy-3.7"
-            tox_env: "pypy3"
 
     steps:
-    - uses: actions/checkout@v1
-    - name: Set up Python
-      uses: actions/setup-python@v2
+    - uses: actions/checkout@v3
+    - name: Set up PDM
+      uses: pdm-project/setup-pdm@v2
       with:
         python-version: ${{ matrix.python }}
-    - name: Install tox
-      run: |
-        python -m pip install --upgrade pip
-        pip install tox
-    - name: Test
-      run: |
-        tox -e ${{ matrix.tox_env }}
+
+    - name: Install dependencies
+      run: pdm sync -d -G test
+
+    - name: Run Tests
+      run: pdm run cover -v

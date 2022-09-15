@@ -5,46 +5,30 @@ import ast
 import sys
 import warnings
 from pathlib import Path
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Sequence
-from typing import Tuple
-from typing import Union
+from typing import Dict, List, Optional, Sequence, Tuple, Union
 
 import attr
 import pytest
-from _pytest._code.code import ExceptionChainRepr
-from _pytest._code.code import ExceptionRepr
-from _pytest._code.code import ReprEntry
-from _pytest._code.code import ReprFileLocation
-from _pytest._code.code import ReprFuncArgs
-from pygments.token import Comment
-from pygments.token import Keyword
-from pygments.token import Name
-from pygments.token import Number
-from pygments.token import Operator
-from pygments.token import String
+from _pytest._code.code import (
+    ExceptionChainRepr,
+    ExceptionRepr,
+    ReprEntry,
+    ReprFileLocation,
+    ReprFuncArgs,
+)
+from pygments.token import Comment, Keyword, Name, Number, Operator, String
 from pygments.token import Text as TextToken
 from pygments.token import Token
 from rich._loop import loop_last
 from rich.columns import Columns
-from rich.console import Console
-from rich.console import ConsoleOptions
-from rich.console import ConsoleRenderable
-from rich.console import Group
-from rich.console import group
-from rich.console import RenderResult
+from rich.console import Console, ConsoleOptions, ConsoleRenderable, Group, RenderResult, group
 from rich.highlighter import ReprHighlighter
 from rich.live import Live
 from rich.panel import Panel
-from rich.progress import Progress
-from rich.progress import SpinnerColumn
-from rich.progress import TaskID
+from rich.progress import Progress, SpinnerColumn, TaskID
 from rich.rule import Rule
 from rich.style import Style
-from rich.syntax import Syntax
-from rich.syntax import SyntaxTheme
+from rich.syntax import Syntax, SyntaxTheme
 from rich.text import Text
 from rich.theme import Theme
 from rich.traceback import PathHighlighter
@@ -66,9 +50,7 @@ def pytest_configure(config):
         # Get the standard terminal reporter plugin and replace it with our
         standard_reporter = config.pluginmanager.getplugin("terminalreporter")
         config.pluginmanager.unregister(standard_reporter)
-        config.pluginmanager.register(
-            RichTerminalReporter(config), "rich-terminal-reporter"
-        )
+        config.pluginmanager.register(RichTerminalReporter(config), "rich-terminal-reporter")
 
 
 @attr.s(auto_attribs=True, hash=True)
@@ -109,7 +91,10 @@ class RichTerminalReporter:
             if self.collect_progress is not None:
                 self.collect_progress.update(
                     self.collect_task,
-                    description=f"[cyan][bold]Collecting[/cyan] [magenta]{report.nodeid}[/magenta] ([green]{self.total_items_collected}[/green] total items)",
+                    description=(
+                        f"[cyan][bold]Collecting[/cyan] [magenta]{report.nodeid}[/magenta] "
+                        f"([green]{self.total_items_collected}[/green] total items)"
+                    ),
                     refresh=True,
                 )
 
@@ -134,13 +119,9 @@ class RichTerminalReporter:
         )
         pypy_version_info = getattr(sys, "pypy_version_info", None)
         if pypy_version_info is not None:
-            column1.add_renderable(
-                f"pypy [cyan]{'.'.join(map(str, pypy_version_info[:3]))}"
-            )
+            column1.add_renderable(f"pypy [cyan]{'.'.join(map(str, pypy_version_info[:3]))}")
         column2 = Columns([f"root [cyan][bold]{session.config.rootpath}"])
-        self.console.print(
-            Panel(Group(column1, column2), title=f"pytest session starts")
-        )
+        self.console.print(Panel(Group(column1, column2), title="pytest session starts"))
 
     def pytest_internalerror(self, excrepr: ExceptionRepr) -> None:
         ...
@@ -254,9 +235,7 @@ class RichTerminalReporter:
                 tb = RichExceptionChainRepr(nodeid, report.longrepr)
                 self.console.print(tb)
 
-    def pytest_keyboard_interrupt(
-        self, excinfo: pytest.ExceptionInfo[BaseException]
-    ) -> None:
+    def pytest_keyboard_interrupt(self, excinfo: pytest.ExceptionInfo[BaseException]) -> None:
         ...
 
     def pytest_unconfigure(self) -> None:
@@ -279,9 +258,7 @@ class RichExceptionChainRepr:
     word_wrap: bool = True
     indent_guides: bool = True
 
-    def __rich_console__(
-        self, console: Console, options: ConsoleOptions
-    ) -> RenderResult:
+    def __rich_console__(self, console: Console, options: ConsoleOptions) -> RenderResult:
         theme = self.get_theme()
         background_style = theme.get_background_style()
         token_style = theme.get_style_for_token
@@ -325,9 +302,7 @@ class RichExceptionChainRepr:
             assert isinstance(entry.reprfileloc, ReprFileLocation)
             if entry.reprfileloc.message:
                 yield Text.assemble(
-                    path_highlighter(
-                        Text(entry.reprfileloc.path, style="pygments.string")
-                    ),
+                    path_highlighter(Text(entry.reprfileloc.path, style="pygments.string")),
                     (":", "pygments.text"),
                     (str(entry.reprfileloc.lineno), "pygments.number"),
                     (": ", "pygments.text"),
@@ -337,9 +312,7 @@ class RichExceptionChainRepr:
                 yield ""
 
     @group()
-    def _render_chain(
-        self, chain: ExceptionChainRepr, options: ConsoleOptions
-    ) -> RenderResult:
+    def _render_chain(self, chain: ExceptionChainRepr, options: ConsoleOptions) -> RenderResult:
         path_highlighter = PathHighlighter()
         repr_highlighter = ReprHighlighter()
         theme = self.get_theme()
@@ -357,9 +330,7 @@ class RichExceptionChainRepr:
             """
             code = code_cache.get(filename)
             if not code:
-                with open(
-                    filename, "rt", encoding="utf-8", errors="replace"
-                ) as code_file:
+                with open(filename, "rt", encoding="utf-8", errors="replace") as code_file:
                     code = code_file.read()
                 code_cache[filename] = code
             return code
